@@ -1,9 +1,11 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local playerBackpack = player.Backpack
 
 local function findCoinContainer()
   local potentialContainers = {
@@ -11,7 +13,7 @@ local function findCoinContainer()
     workspace:FindFirstChild("Factory") and workspace.Factory:FindFirstChild("CoinContainer"),
     workspace:FindFirstChild("Hotel") and workspace.Hotel:FindFirstChild("CoinContainer"),
     workspace:FindFirstChild("MilBase") and workspace.MilBase:FindFirstChild("CoinContainer"),
-    workspace:FindFirstChild("House2") and workspace.House2:FindFirstChild("CoinContainer"), -- Corrected capitalization
+    workspace:FindFirstChild("House2") and workspace.House2:FindFirstChild("CoinContainer"),
   }
 
   for _, container in pairs(potentialContainers) do
@@ -23,10 +25,8 @@ local function findCoinContainer()
 end
 
 local coinContainer = findCoinContainer()
-
 local coins = {}
 local collectedCoins = {}
-
 
 local function updateCoins()
   if coinContainer then
@@ -35,7 +35,6 @@ local function updateCoins()
     coins = {}
   end
 end
-
 
 local function findNearestCoin()
   local closestCoin = nil
@@ -59,7 +58,6 @@ local function teleportToCoin(coin)
     collectedCoins[coin] = true
     coin:Destroy()
 
-    -- Teleport up after a delay
     game:GetService("Debris"):AddItem(coroutine.wrap(function()
       wait(0.5)
       local currentPos = humanoidRootPart.Position
@@ -68,15 +66,27 @@ local function teleportToCoin(coin)
   end
 end
 
+local function pickupGun()
+  local gun = workspace:FindFirstChild("GunDrop")
+  if gun then
+    gun.Parent = playerBackpack
+    print("Gun picked up!")
+  else
+    print("Gun not found!")
+  end
+end
+
 
 local function onCharacterAdded(newCharacter)
   humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
   updateCoins()
+  pickupGun() -- Pick up the gun when the character loads
 end
 
 player.CharacterAdded:Connect(onCharacterAdded)
 
 updateCoins()
+pickupGun() -- Attempt to pick up the gun initially
 
 while true do
   local nearestCoin = findNearestCoin()
