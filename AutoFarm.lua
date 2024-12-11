@@ -14,6 +14,7 @@ local function findCoinContainer()
     workspace:FindFirstChild("Hotel") and workspace.Hotel:FindFirstChild("CoinContainer"),
     workspace:FindFirstChild("MilBase") and workspace.MilBase:FindFirstChild("CoinContainer"),
     workspace:FindFirstChild("House2") and workspace.House2:FindFirstChild("CoinContainer"),
+    workspace:FindFirstChild("BioLab") and workspace.BioLab:FindFirstChild("CoinContainer"),
   }
 
   for _, container in pairs(potentialContainers) do
