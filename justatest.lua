@@ -73,3 +73,4 @@ local function onTouch(hit)
 end
 
 character:WaitForChild("HumanoidRootPart").Touched:Connect(onTouch)
+ 
