@@ -49,7 +49,7 @@ end
 
 
 -- Пример использования:  Поиск монеты и удаление ее, если она найдена
-local radiusToSearch = 2  -- Радиус поиска монеты (измените по необходимости)
+local radiusToSearch = 4  -- Радиус поиска монеты (измените по необходимости)
 
 local coinToRemove = findNearestCoin(radiusToSearch)
 
