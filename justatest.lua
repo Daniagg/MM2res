@@ -1,50 +1,75 @@
+-- Локальный скрипт (разместите в PlayerScripts или Character Scripts)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+-- Получаем объект игрока
+local player = game:GetService("Players").LocalPlayer
+-- Получаем объект персонажа игрока
+local character = player.Character or player.CharacterAdded:Wait()
 
+-- Функция поиска контейнера с монетами (тот же код)
 local function findCoinContainer()
-    local coinsFolder = workspace:FindFirstChild("Coins")
-    return coinsFolder
+    for _, child in pairs(workspace:GetChildren()) do
+        local coinContainer = child:FindFirstChild("CoinContainer")
+        if coinContainer then
+            return coinContainer
+        end
+    end
+    return nil
 end
 
-
+-- Функция поиска ближайшей монеты в радиусе (тот же код)
 local function findNearestCoin(radius)
     local coinContainer = findCoinContainer()
     if not coinContainer then
         print("CoinContainer not found")
         return nil
     end
-
-    local humanoidRootPart = Character:WaitForChild("HumanoidRootPart") -- Использование Character, а не character
-    if not humanoidRootPart then
-        print("HumanoidRootPart not found")
-        return nil
-    end
-    
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     local nearestCoin = nil
     local nearestDistance = radius
     for _, coin in pairs(coinContainer:GetChildren()) do
-        if coin:IsA("BasePart") then --Убеждаемся, что это BasePart (например, Part или MeshPart)
-            local distance = (coin.Position - humanoidRootPart.Position).Magnitude
-            if distance < nearestDistance then
-                nearestCoin = coin
-                nearestDistance = distance
-            end
+        local distance = (coin.Position - humanoidRootPart.Position).Magnitude
+        if distance < nearestDistance then
+            nearestCoin = coin
+            nearestDistance = distance
         end
     end
     return nearestCoin
 end
 
 
-local function removeNearestCoin(radius)
-    local nearestCoin = findNearestCoin(radius)
-    if nearestCoin then
-        nearestCoin:Destroy()
-        print("Coin removed!")
+-- Функция для удаления монеты (то, что нужно добавить)
+local function deleteCoin(coin)
+    if coin then
+        coin:Destroy() -- Destroy() удаляет объект.  Эквивалентно .Parent = nil
+        print("Монета уничтожена!")
     else
-        print("No coin found within the radius.")
+        print("Нечего удалять.  Монета nil.")
     end
 end
 
-local radius = 1  -- Радиус поиска монет
+
+-- Пример использования:  Поиск монеты и удаление ее, если она найдена
+local radiusToSearch = 1.5  -- Радиус поиска монеты (измените по необходимости)
+
+local coinToRemove = findNearestCoin(radiusToSearch)
+
+if coinToRemove then
+    deleteCoin(coinToRemove)
+else
+    print("Нет монет в радиусе " .. radiusToSearch .. " studs.")
+end
+
+
+
+--  Опционально:  Можно добавить событие Touched на HumanoidRootPart для автоматического удаления монет при касании
+
+local function onTouch(hit)
+    if hit:IsA("BasePart") and hit.Name == "Coin" then --Проверяем что это part и её имя "Coin"
+        local coinContainer = findCoinContainer()
+        if coinContainer and hit.Parent == coinContainer then -- Удостоверимся что монета находится в контейнере
+            deleteCoin(hit)
+        end
+    end
+end
+
+character:WaitForChild("HumanoidRootPart").Touched:Connect(onTouch)
